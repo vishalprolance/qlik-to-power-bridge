@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -25,7 +24,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-// Define types for our application
 interface AnalysisResult {
   appName: string;
   appType: "QlikView" | "Qlik Sense";
@@ -67,8 +65,8 @@ const Analysis = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
+  const fileInputRef = useState<HTMLInputElement | null>(null);
 
-  // Handle drag events
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -79,7 +77,6 @@ const Analysis = () => {
     }
   };
 
-  // Handle drop event
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -91,7 +88,6 @@ const Analysis = () => {
     }
   };
 
-  // Handle file selection
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -99,9 +95,13 @@ const Analysis = () => {
     }
   };
 
-  // Process the file
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   const handleFile = (file: File) => {
-    // Check if file is a QVF or QVW
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     
     if (fileExtension !== 'qvf' && fileExtension !== 'qvw') {
@@ -119,7 +119,6 @@ const Analysis = () => {
       description: `${file.name} has been selected for analysis.`,
     });
 
-    // Begin file analysis
     simulateAnalysis(file);
   };
 
@@ -127,7 +126,6 @@ const Analysis = () => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     
-    // Simulate the AI analysis process with progress updates
     const progressInterval = setInterval(() => {
       setAnalysisProgress(prev => {
         const newProgress = prev + Math.random() * 15;
@@ -139,7 +137,6 @@ const Analysis = () => {
       });
     }, 300);
 
-    // Simulate completion after a delay
     setTimeout(() => {
       clearInterval(progressInterval);
       setAnalysisProgress(100);
@@ -148,7 +145,6 @@ const Analysis = () => {
         setIsAnalyzing(false);
         setHasResults(true);
         
-        // Create a mock analysis result based on the file
         const fileType = file.name.endsWith('.qvf') ? "Qlik Sense" : "QlikView";
         const mockResults: AnalysisResult = {
           appName: file.name.replace(/\.(qvf|qvw)$/i, ''),
@@ -278,16 +274,15 @@ const Analysis = () => {
                         Supported formats: .qvf, .qvw
                       </p>
                       <div className="flex justify-center">
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <Input
-                            id="file-upload"
-                            type="file"
-                            className="hidden"
-                            accept=".qvf,.qvw"
-                            onChange={handleFileUpload}
-                          />
-                          <Button variant="outline">Browse Files</Button>
-                        </label>
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          className="hidden"
+                          ref={(input) => fileInputRef.current = input}
+                          accept=".qvf,.qvw"
+                          onChange={handleFileUpload}
+                        />
+                        <Button variant="outline" onClick={triggerFileInput}>Browse Files</Button>
                       </div>
                     </>
                   )}
