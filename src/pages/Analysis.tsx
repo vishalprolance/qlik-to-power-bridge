@@ -11,35 +11,208 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileUp, Database, Sheet, BarChart3, AlertCircle, Settings } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { 
+  FileUp, 
+  Database, 
+  Sheet, 
+  BarChart3, 
+  AlertCircle, 
+  Settings,
+  FileCheck,
+  FileWarning,
+  Loader2
+} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+
+// Define types for our application
+interface AnalysisResult {
+  appName: string;
+  appType: "QlikView" | "Qlik Sense";
+  complexity: "Low" | "Medium" | "High";
+  sheets: number;
+  dataTables: number;
+  visualizations: number;
+  variables: number;
+  dataSources: DataSource[];
+  visualizationTypes: VisualizationType[];
+  migrationConsiderations: MigrationConsideration[];
+}
+
+interface DataSource {
+  name: string;
+  type: string;
+  isPrimary: boolean;
+  details: string;
+}
+
+interface VisualizationType {
+  name: string;
+  count: number;
+  percentage: number;
+}
+
+interface MigrationConsideration {
+  title: string;
+  description: string;
+  complexity: "Low" | "Medium" | "High";
+  instances?: number;
+}
 
 const Analysis = () => {
   const { toast } = useToast();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasResults, setHasResults] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      toast({
-        title: "File selected",
-        description: `${file.name} has been selected for analysis.`,
-      });
-      simulateAnalysis();
+  // Handle drag events
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
   };
 
-  const simulateAnalysis = () => {
-    setIsAnalyzing(true);
-    // Simulate analysis delay
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setHasResults(true);
+  // Handle drop event
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    }
+  };
+
+  // Handle file selection
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  // Process the file
+  const handleFile = (file: File) => {
+    // Check if file is a QVF or QVW
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    
+    if (fileExtension !== 'qvf' && fileExtension !== 'qvw') {
       toast({
-        title: "Analysis complete",
-        description: "The Qlik application has been analyzed successfully.",
+        title: "Invalid file format",
+        description: "Please upload a QVF (Qlik Sense) or QVW (QlikView) file.",
+        variant: "destructive"
       });
+      return;
+    }
+
+    setUploadedFile(file);
+    toast({
+      title: "File selected",
+      description: `${file.name} has been selected for analysis.`,
+    });
+
+    // Begin file analysis
+    simulateAnalysis(file);
+  };
+
+  const simulateAnalysis = (file: File) => {
+    setIsAnalyzing(true);
+    setAnalysisProgress(0);
+    
+    // Simulate the AI analysis process with progress updates
+    const progressInterval = setInterval(() => {
+      setAnalysisProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        if (newProgress >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 300);
+
+    // Simulate completion after a delay
+    setTimeout(() => {
+      clearInterval(progressInterval);
+      setAnalysisProgress(100);
+      
+      setTimeout(() => {
+        setIsAnalyzing(false);
+        setHasResults(true);
+        
+        // Create a mock analysis result based on the file
+        const fileType = file.name.endsWith('.qvf') ? "Qlik Sense" : "QlikView";
+        const mockResults: AnalysisResult = {
+          appName: file.name.replace(/\.(qvf|qvw)$/i, ''),
+          appType: fileType,
+          complexity: "Medium",
+          sheets: 9,
+          dataTables: 12,
+          visualizations: 47,
+          variables: 15,
+          dataSources: [
+            {
+              name: "SQL Database",
+              type: "SQL Server",
+              isPrimary: true,
+              details: "SALES_DB"
+            },
+            {
+              name: "Excel Files",
+              type: "Excel",
+              isPrimary: false,
+              details: "3 files"
+            },
+            {
+              name: "REST API",
+              type: "Web API",
+              isPrimary: false,
+              details: "Customer Data"
+            }
+          ],
+          visualizationTypes: [
+            { name: "Bar Charts", count: 14, percentage: 28 },
+            { name: "Line Charts", count: 9, percentage: 19 },
+            { name: "Pie/Donut Charts", count: 7, percentage: 15 },
+            { name: "Tables/Pivot Tables", count: 11, percentage: 23 },
+            { name: "KPIs/Gauges", count: 6, percentage: 15 }
+          ],
+          migrationConsiderations: [
+            {
+              title: "Complex Set Analysis",
+              description: "This app uses complex set analysis expressions which will need careful translation to DAX",
+              complexity: "High",
+              instances: 5
+            },
+            {
+              title: "Custom Calendar Logic",
+              description: "Calendar dimensions use custom fiscal periods that will need to be recreated",
+              complexity: "Medium"
+            },
+            {
+              title: "Advanced Visualizations",
+              description: "Some custom visualizations may require Power BI custom visuals or alternative approaches",
+              complexity: "Medium",
+              instances: 3
+            }
+          ]
+        };
+        
+        setAnalysisResults(mockResults);
+        
+        toast({
+          title: "Analysis complete",
+          description: `The ${fileType} application has been analyzed successfully.`,
+        });
+      }, 500);
     }, 3000);
   };
 
@@ -69,26 +242,65 @@ const Analysis = () => {
             </CardHeader>
             <CardContent>
               <div className="grid w-full gap-6">
-                <div className="border-2 border-dashed rounded-lg p-8 text-center border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors">
-                  <FileUp className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
-                  <h3 className="font-medium mb-2">Drag & drop your file here</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Supported formats: .qvf, .qvw
-                  </p>
-                  <div className="flex justify-center">
-                    <label htmlFor="file-upload">
-                      <Input
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        accept=".qvf,.qvw"
-                        onChange={handleFileUpload}
-                      />
-                      <Button variant="outline">Browse Files</Button>
-                    </label>
-                  </div>
+                <div 
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-lg p-8 text-center ${
+                    dragActive 
+                      ? "border-primary bg-primary/10" 
+                      : uploadedFile 
+                        ? "border-green-500/25 bg-green-50 dark:bg-green-950/10" 
+                        : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                  } transition-colors`}
+                >
+                  {uploadedFile ? (
+                    <div className="flex flex-col items-center">
+                      <FileCheck className="h-12 w-12 text-green-500 mb-4" />
+                      <h3 className="font-medium mb-1">{uploadedFile.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        File selected for analysis
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setUploadedFile(null)}
+                        className="mt-2"
+                      >
+                        Select Different File
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <FileUp className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+                      <h3 className="font-medium mb-2">Drag & drop your file here</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Supported formats: .qvf, .qvw
+                      </p>
+                      <div className="flex justify-center">
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <Input
+                            id="file-upload"
+                            type="file"
+                            className="hidden"
+                            accept=".qvf,.qvw"
+                            onChange={handleFileUpload}
+                          />
+                          <Button variant="outline">Browse Files</Button>
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
+              
+              {uploadedFile && !isAnalyzing && !hasResults && (
+                <div className="mt-6 flex justify-center">
+                  <Button onClick={() => simulateAnalysis(uploadedFile)}>
+                    Analyze Application
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -146,7 +358,10 @@ const Analysis = () => {
                       <p className="text-xs text-muted-foreground">QlikView sample app</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={simulateAnalysis}>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const mockFile = new File([""], "Sales Analysis.qvw", { type: "application/octet-stream" });
+                    handleFile(mockFile);
+                  }}>
                     Analyze
                   </Button>
                 </div>
@@ -158,7 +373,10 @@ const Analysis = () => {
                       <p className="text-xs text-muted-foreground">Qlik Sense sample app</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={simulateAnalysis}>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const mockFile = new File([""], "Executive Dashboard.qvf", { type: "application/octet-stream" });
+                    handleFile(mockFile);
+                  }}>
                     Analyze
                   </Button>
                 </div>
@@ -170,7 +388,10 @@ const Analysis = () => {
                       <p className="text-xs text-muted-foreground">Qlik Sense sample app</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={simulateAnalysis}>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const mockFile = new File([""], "Inventory Management.qvf", { type: "application/octet-stream" });
+                    handleFile(mockFile);
+                  }}>
                     Analyze
                   </Button>
                 </div>
@@ -181,7 +402,7 @@ const Analysis = () => {
       </Tabs>
 
       {isAnalyzing && (
-        <Card className="animate-pulse-slow">
+        <Card>
           <CardHeader>
             <CardTitle>Analyzing Application...</CardTitle>
             <CardDescription>
@@ -189,48 +410,67 @@ const Analysis = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="h-4 bg-muted rounded-full w-3/4"></div>
-            <div className="h-4 bg-muted rounded-full w-1/2"></div>
-            <div className="h-4 bg-muted rounded-full w-5/6"></div>
-            <div className="h-4 bg-muted rounded-full w-2/3"></div>
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">AI analysis in progress</span>
+            </div>
+            
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>Progress</span>
+                <span>{Math.round(analysisProgress)}%</span>
+              </div>
+              <Progress value={analysisProgress} />
+            </div>
+            
+            <div className="space-y-2 mt-4 text-sm text-muted-foreground">
+              <p>• Scanning Qlik application structure</p>
+              <p>• Analyzing data model and relationships</p>
+              <p>• Identifying visualizations and expressions</p>
+              <p>• Generating migration recommendations</p>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {hasResults && (
+      {hasResults && analysisResults && (
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Analysis Results: Executive Dashboard</CardTitle>
+              <CardTitle>Analysis Results: {analysisResults.appName}</CardTitle>
               <CardDescription>
-                Qlik Sense application analysis summary
+                {analysisResults.appType} application analysis summary
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Application Type</h3>
-                  <p className="text-lg font-medium">Qlik Sense</p>
+                  <p className="text-lg font-medium">{analysisResults.appType}</p>
                 </div>
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Sheets/Reports</h3>
-                  <p className="text-lg font-medium">9</p>
+                  <p className="text-lg font-medium">{analysisResults.sheets}</p>
                 </div>
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Data Tables</h3>
-                  <p className="text-lg font-medium">12</p>
+                  <p className="text-lg font-medium">{analysisResults.dataTables}</p>
                 </div>
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Visualizations</h3>
-                  <p className="text-lg font-medium">47</p>
+                  <p className="text-lg font-medium">{analysisResults.visualizations}</p>
                 </div>
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Variables</h3>
-                  <p className="text-lg font-medium">15</p>
+                  <p className="text-lg font-medium">{analysisResults.variables}</p>
                 </div>
                 <div className="border rounded-md p-4">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Complexity Score</h3>
-                  <p className="text-lg font-medium text-amber-500">Medium</p>
+                  <p className={`text-lg font-medium ${
+                    analysisResults.complexity === 'High' ? 'text-red-500' : 
+                    analysisResults.complexity === 'Medium' ? 'text-amber-500' : 
+                    'text-green-500'
+                  }`}>{analysisResults.complexity}</p>
                 </div>
               </div>
             </CardContent>
@@ -248,27 +488,17 @@ const Analysis = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="border rounded-md p-3">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium">SQL Database</span>
-                      <span className="text-sm text-muted-foreground">Primary</span>
+                  {analysisResults.dataSources.map((source, index) => (
+                    <div key={index} className="border rounded-md p-3">
+                      <div className="flex justify-between mb-1">
+                        <span className="font-medium">{source.name}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {source.isPrimary ? 'Primary' : 'Secondary'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{source.type} | {source.details}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">SQL Server | SALES_DB</p>
-                  </div>
-                  <div className="border rounded-md p-3">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium">Excel Files</span>
-                      <span className="text-sm text-muted-foreground">Secondary</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Excel | 3 files</p>
-                  </div>
-                  <div className="border rounded-md p-3">
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium">REST API</span>
-                      <span className="text-sm text-muted-foreground">Secondary</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Web API | Customer Data</p>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -284,45 +514,20 @@ const Analysis = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span>Bar Charts</span>
-                    <span className="font-medium">14</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "28%" }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Line Charts</span>
-                    <span className="font-medium">9</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "19%" }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Pie/Donut Charts</span>
-                    <span className="font-medium">7</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "15%" }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Tables/Pivot Tables</span>
-                    <span className="font-medium">11</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "23%" }}></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>KPIs/Gauges</span>
-                    <span className="font-medium">6</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: "15%" }}></div>
-                  </div>
+                  {analysisResults.visualizationTypes.map((viz, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between">
+                        <span>{viz.name}</span>
+                        <span className="font-medium">{viz.count}</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ width: `${viz.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -350,41 +555,101 @@ const Analysis = () => {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm">!</div>
-                  <div>
-                    <h4 className="font-medium">Complex Set Analysis (5 instances)</h4>
-                    <p className="text-sm text-muted-foreground">
-                      This app uses complex set analysis expressions which will need careful translation to DAX
-                    </p>
+                {analysisResults.migrationConsiderations.map((consideration, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center text-sm
+                      ${consideration.complexity === 'High' 
+                        ? 'bg-red-100 text-red-600' 
+                        : consideration.complexity === 'Medium'
+                          ? 'bg-amber-100 text-amber-600'
+                          : 'bg-green-100 text-green-600'
+                      }`}>!</div>
+                    <div>
+                      <h4 className="font-medium">
+                        {consideration.title}
+                        {consideration.instances && ` (${consideration.instances} instances)`}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {consideration.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm">!</div>
-                  <div>
-                    <h4 className="font-medium">Custom Calendar Logic</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Calendar dimensions use custom fiscal periods that will need to be recreated
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm">!</div>
-                  <div>
-                    <h4 className="font-medium">Advanced Visualizations (3 instances)</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Some custom visualizations may require Power BI custom visuals or alternative approaches
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
             <CardFooter className="border-t bg-muted/30">
               <p className="text-sm text-muted-foreground">
-                These insights are based on automated analysis and may require further investigation.
+                These insights are based on automated AI analysis and may require further investigation.
               </p>
+            </CardFooter>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>AI-Generated Migration Recommendations</CardTitle>
+              <CardDescription>Based on this Qlik application analysis, here are our recommended next steps</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-blue-50 border border-blue-100 rounded-md dark:bg-blue-950/20 dark:border-blue-900/50">
+                <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Power BI Architecture Recommendations</h3>
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  Based on your Qlik application's complexity and data model, we recommend using Power BI Premium capacity 
+                  with composite models to accommodate the multi-source data connections while maintaining performance.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="font-medium">Key Migration Steps</h3>
+                
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center">1</div>
+                  <div>
+                    <h4 className="font-medium">Data Model Recreation</h4>
+                    <p className="text-sm text-muted-foreground">
+                      First, recreate your data model in Power BI, focusing on establishing proper relationships and implementing calculated columns.
+                    </p>
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <a href="/data-modeling">Go to Data Modeling</a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center">2</div>
+                  <div>
+                    <h4 className="font-medium">Expression Conversion</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Convert complex Qlik expressions to DAX, particularly focusing on set analysis equivalents.
+                    </p>
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <a href="/mapping">View Expression Mapping</a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 text-primary flex items-center justify-center">3</div>
+                  <div>
+                    <h4 className="font-medium">Visualization Recreation</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Rebuild your visualizations in Power BI, using appropriate alternatives for any custom Qlik visuals.
+                    </p>
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <a href="/visualization">Explore Visualization Options</a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="border-t flex justify-between">
+              <Button variant="outline">Download Analysis Report</Button>
+              <Button>Continue to Feature Mapping</Button>
             </CardFooter>
           </Card>
         </div>
