@@ -20,7 +20,9 @@ import {
   Settings,
   FileCheck,
   FileWarning,
-  Loader2
+  Loader2,
+  Link as LinkIcon,
+  Globe
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -63,6 +65,7 @@ const Analysis = () => {
   const [hasResults, setHasResults] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [qlikViewUrl, setQlikViewUrl] = useState<string>("");
   const [dragActive, setDragActive] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -114,15 +117,51 @@ const Analysis = () => {
     }
 
     setUploadedFile(file);
+    setQlikViewUrl(""); // Clear URL if file is uploaded
     toast({
       title: "File selected",
       description: `${file.name} has been selected for analysis.`,
     });
-
-    simulateAnalysis(file);
+  };
+  
+  const handleUrlSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic URL validation
+    if (!qlikViewUrl.trim()) {
+      toast({
+        title: "URL required",
+        description: "Please enter a valid Qlik view URL.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if it's a valid URL format
+    try {
+      new URL(qlikViewUrl);
+    } catch (error) {
+      toast({
+        title: "Invalid URL format",
+        description: "Please enter a valid URL starting with http:// or https://",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // If URL is valid, clear file upload if any
+    setUploadedFile(null);
+    
+    toast({
+      title: "URL accepted",
+      description: "Qlik URL has been accepted for analysis.",
+    });
+    
+    // Simulate the analysis with the URL
+    simulateAnalysis(null, qlikViewUrl);
   };
 
-  const simulateAnalysis = (file: File) => {
+  const simulateAnalysis = (file: File | null = null, url: string = "") => {
     setIsAnalyzing(true);
     setAnalysisProgress(0);
     
@@ -145,9 +184,22 @@ const Analysis = () => {
         setIsAnalyzing(false);
         setHasResults(true);
         
-        const fileType = file.name.endsWith('.qvf') ? "Qlik Sense" : "QlikView";
+        let appName = "";
+        let fileType: "Qlik Sense" | "QlikView" = "QlikView";
+        
+        if (file) {
+          appName = file.name.replace(/\.(qvf|qvw)$/i, '');
+          fileType = file.name.endsWith('.qvf') ? "Qlik Sense" : "QlikView";
+        } else if (url) {
+          // Extract name from URL or use domain name
+          const urlObj = new URL(url);
+          appName = urlObj.pathname.split('/').pop() || urlObj.hostname;
+          // Assume QlikView for URLs, but could be refined with more logic
+          fileType = url.includes("sense") ? "Qlik Sense" : "QlikView";
+        }
+        
         const mockResults: AnalysisResult = {
-          appName: file.name.replace(/\.(qvf|qvw)$/i, ''),
+          appName: appName,
           appType: fileType,
           complexity: "Medium",
           sheets: 9,
@@ -217,13 +269,14 @@ const Analysis = () => {
       <div>
         <h1 className="text-3xl font-bold mb-2">Qlik Application Analysis</h1>
         <p className="text-muted-foreground">
-          Upload or connect to your Qlik applications to analyze their structure and complexity
+          Upload, connect to, or provide a URL for your Qlik applications to analyze their structure and complexity
         </p>
       </div>
 
       <Tabs defaultValue="upload" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
+        <TabsList className="grid w-full max-w-md grid-cols-4">
           <TabsTrigger value="upload">Upload</TabsTrigger>
+          <TabsTrigger value="url">URL</TabsTrigger>
           <TabsTrigger value="connect">Connect</TabsTrigger>
           <TabsTrigger value="sample">Sample Apps</TabsTrigger>
         </TabsList>
@@ -296,6 +349,45 @@ const Analysis = () => {
                   </Button>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="url" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analyze Qlik Application via URL</CardTitle>
+              <CardDescription>
+                Provide a URL to your Qlik Sense or QlikView application
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUrlSubmit} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <Input
+                      placeholder="https://your-qlik-server.com/app/my-application"
+                      value={qlikViewUrl}
+                      onChange={(e) => setQlikViewUrl(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                
+                {qlikViewUrl && (
+                  <div className="bg-muted/50 p-3 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium truncate">{qlikViewUrl}</span>
+                    </div>
+                  </div>
+                )}
+                
+                <Button type="submit" className="w-full">
+                  Analyze URL
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
