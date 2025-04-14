@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { 
   Card, 
   CardContent, 
@@ -65,7 +65,7 @@ const Analysis = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
-  const fileInputRef = useState<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -278,7 +278,7 @@ const Analysis = () => {
                           id="file-upload"
                           type="file"
                           className="hidden"
-                          ref={(input) => fileInputRef.current = input}
+                          ref={fileInputRef}
                           accept=".qvf,.qvw"
                           onChange={handleFileUpload}
                         />
