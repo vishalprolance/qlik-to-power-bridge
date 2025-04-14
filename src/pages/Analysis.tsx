@@ -84,7 +84,7 @@ const Analysis = () => {
                         accept=".qvf,.qvw"
                         onChange={handleFileUpload}
                       />
-                      <Button as="span" variant="outline">Browse Files</Button>
+                      <Button variant="outline">Browse Files</Button>
                     </label>
                   </div>
                 </div>

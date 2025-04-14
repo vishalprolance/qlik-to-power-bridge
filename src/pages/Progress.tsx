@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -8,7 +7,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   CheckCircle2,
@@ -201,7 +200,7 @@ const Progress = () => {
                     <span className="text-sm font-medium">Overall Progress</span>
                     <span className="text-sm text-muted-foreground">{project.progress}%</span>
                   </div>
-                  <Progress value={project.progress} />
+                  <ProgressBar value={project.progress} />
                 </div>
                 
                 <div className="grid grid-cols-3 gap-2 text-center">
