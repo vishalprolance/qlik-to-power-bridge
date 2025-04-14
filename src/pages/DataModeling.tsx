@@ -142,7 +142,7 @@ const DataModeling = () => {
                 <div className="border p-3 rounded-md">
                   <h4 className="font-medium mb-1">Circular References</h4>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Qlik's associative model handles circular references, but they should be avoided in Power BI.
+                    Qlik&apos;s associative model handles circular references, but they should be avoided in Power BI.
                   </p>
                   <div className="text-sm">
                     <span className="font-medium">Solution:</span> Restructure data model to eliminate circular dependencies
@@ -468,7 +468,7 @@ const DataModeling = () => {
                           <h4 className="text-xs text-muted-foreground">Power Query M</h4>
                           <p className="text-sm font-mono overflow-x-auto">
                             Source = ...<br />
-                            AddedYear = Table.AddColumn(Source, "Year", each Date.Year([Date]))
+                            AddedYear = Table.AddColumn(Source, &quot;Year&quot;, each Date.Year([Date]))
                           </p>
                         </div>
                       </div>
