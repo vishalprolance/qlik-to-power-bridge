@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -521,7 +522,7 @@ const DataModeling = () => {
                         <div>
                           <h4 className="text-xs text-muted-foreground">Qlik Expression</h4>
                           <p className="text-sm font-mono overflow-x-auto">
-                            Sum({&lt;Year={2023}&gt;} Sales)
+                            Sum({"{<Year={2023}>}"} Sales)
                           </p>
                         </div>
                         <div>
