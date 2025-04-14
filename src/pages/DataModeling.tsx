@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Database, FileText, GitCompare, Link, Star } from "lucide-react";
+import { Code } from "lucide-react";
 
 const DataModeling = () => {
   return (
@@ -402,7 +403,7 @@ const DataModeling = () => {
                     <li>Clarifying fact vs. dimension tables</li>
                     <li>Creating proper relationship cardinality</li>
                     <li>Moving complex logic from the data structure to DAX measures</li>
-                    <li>Creating a proper date dimension to replace Qlik's automatic calendar</li>
+                    <li>Creating a proper date dimension to replace Qlik&apos;s automatic calendar</li>
                   </ol>
                 </div>
               </div>
@@ -440,14 +441,14 @@ const DataModeling = () => {
                           <h4 className="text-xs text-muted-foreground">Qlik Script</h4>
                           <p className="text-sm font-mono overflow-x-auto">
                             LOAD * FROM file.csv<br />
-                            WHERE Value > 100;
+                            WHERE Value &gt; 100;
                           </p>
                         </div>
                         <div>
                           <h4 className="text-xs text-muted-foreground">Power Query M</h4>
                           <p className="text-sm font-mono overflow-x-auto">
                             Source = Csv.Document(...)<br />
-                            Filtered = Table.SelectRows(Source, each [Value] > 100)
+                            Filtered = Table.SelectRows(Source, each [Value] &gt; 100)
                           </p>
                         </div>
                       </div>

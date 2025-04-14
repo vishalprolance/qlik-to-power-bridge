@@ -1,734 +1,427 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BookOpen, 
-  Code, 
-  ExternalLink, 
-  FileText, 
-  GraduationCap, 
-  MessageSquare, 
-  PlayCircle, 
-  Users 
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ArrowUpRight, BookOpen, FileText, GraduationCap, Search, Video } from "lucide-react";
+import { useState } from "react";
+
+const resources = [
+  {
+    title: "Power BI Documentation",
+    description: "Official Microsoft documentation for Power BI Desktop and Service",
+    category: "Documentation",
+    type: "Official",
+    url: "https://learn.microsoft.com/power-bi/",
+    tags: ["documentation", "reference", "official"]
+  },
+  {
+    title: "DAX Guide",
+    description: "Comprehensive guide to Data Analysis Expressions (DAX)",
+    category: "Documentation",
+    type: "Community",
+    url: "https://dax.guide/",
+    tags: ["dax", "formulas", "reference"]
+  },
+  {
+    title: "Guy in a Cube",
+    description: "YouTube channel with Power BI tutorials and news",
+    category: "Video",
+    type: "Community",
+    url: "https://www.youtube.com/c/GuyinaCube",
+    tags: ["tutorial", "video", "news"]
+  },
+  {
+    title: "SQLBI",
+    description: "Advanced DAX patterns and techniques",
+    category: "Training",
+    type: "Community",
+    url: "https://www.sqlbi.com/",
+    tags: ["dax", "advanced", "modeling"]
+  },
+  {
+    title: "Microsoft Power BI Community",
+    description: "Forums and discussions for Power BI users",
+    category: "Community",
+    type: "Official",
+    url: "https://community.powerbi.com/",
+    tags: ["forum", "community", "help"]
+  },
+  {
+    title: "Migration from QlikView to Power BI",
+    description: "Official Microsoft guide on migrating from QlikView to Power BI",
+    category: "Migration",
+    type: "Official",
+    url: "https://learn.microsoft.com/power-bi/guidance/migrate-from-qlikview",
+    tags: ["migration", "qlikview", "guide"]
+  },
+  {
+    title: "Migrating from Qlik to Power BI",
+    description: "Best practices for a successful migration",
+    category: "Migration",
+    type: "Community",
+    url: "#",
+    tags: ["migration", "qlik", "best practices"]
+  },
+  {
+    title: "Power BI DAX Functions Reference",
+    description: "Complete reference for all DAX functions",
+    category: "Documentation",
+    type: "Official",
+    url: "https://learn.microsoft.com/dax/",
+    tags: ["dax", "reference", "functions"]
+  },
+  {
+    title: "Power Query M Formula Language",
+    description: "Reference documentation for Power Query formulas",
+    category: "Documentation",
+    type: "Official",
+    url: "https://learn.microsoft.com/powerquery-m/",
+    tags: ["power query", "m", "etl"]
+  },
+  {
+    title: "Enterprise DNA",
+    description: "Advanced Power BI training courses and resources",
+    category: "Training",
+    type: "Community",
+    url: "https://enterprisedna.co/",
+    tags: ["training", "courses", "advanced"]
+  },
+  {
+    title: "Power BI Tips",
+    description: "Tips and tricks for Power BI development",
+    category: "Blog",
+    type: "Community",
+    url: "https://powerbi.tips/",
+    tags: ["tips", "tricks", "blog"]
+  },
+  {
+    title: "Qlik to Power BI: Expression Conversion",
+    description: "Guide for converting Qlik expressions to DAX",
+    category: "Migration",
+    type: "Community",
+    url: "#",
+    tags: ["conversion", "expressions", "dax"]
+  }
+];
 
 const Resources = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  
+  const categories = [...new Set(resources.map(resource => resource.category))];
+  
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = 
+      resource.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+    const matchesCategory = selectedCategories.length === 0 || 
+      selectedCategories.includes(resource.category);
+      
+    return matchesSearch && matchesCategory;
+  });
+  
+  const toggleCategory = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Resources & Documentation</h1>
+        <h1 className="text-3xl font-bold mb-2">Learning Resources</h1>
         <p className="text-muted-foreground">
-          Access guides, tutorials, and documentation to support your migration journey
+          Documentation, guides, and training materials to support your Qlik to Power BI migration
         </p>
       </div>
-
-      <Tabs defaultValue="guides" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-4">
-          <TabsTrigger value="guides">Guides</TabsTrigger>
-          <TabsTrigger value="videos">Videos</TabsTrigger>
-          <TabsTrigger value="community">Community</TabsTrigger>
-          <TabsTrigger value="downloads">Downloads</TabsTrigger>
-        </TabsList>
+      
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="md:w-3/4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Search Resources</CardTitle>
+              <CardDescription>
+                Find helpful documentation and learning materials
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative mb-6">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search by keyword, topic, or tag..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-6">
+                {categories.map(category => (
+                  <Badge 
+                    key={category} 
+                    variant={selectedCategories.includes(category) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => toggleCategory(category)}
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+              
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-4">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="official">Official</TabsTrigger>
+                  <TabsTrigger value="migration">Migration</TabsTrigger>
+                  <TabsTrigger value="community">Community</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="all" className="pt-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredResources.length > 0 ? (
+                      filteredResources.map((resource, idx) => (
+                        <ResourceCard key={idx} resource={resource} />
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">No resources found matching your criteria</p>
+                        <Button 
+                          variant="link" 
+                          onClick={() => {
+                            setSearchTerm("");
+                            setSelectedCategories([]);
+                          }}
+                        >
+                          Clear filters
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="official" className="pt-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredResources.filter(r => r.type === "Official").length > 0 ? (
+                      filteredResources
+                        .filter(r => r.type === "Official")
+                        .map((resource, idx) => (
+                          <ResourceCard key={idx} resource={resource} />
+                        ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">No official resources found matching your criteria</p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="migration" className="pt-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredResources.filter(r => r.category === "Migration").length > 0 ? (
+                      filteredResources
+                        .filter(r => r.category === "Migration")
+                        .map((resource, idx) => (
+                          <ResourceCard key={idx} resource={resource} />
+                        ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">No migration resources found matching your criteria</p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="community" className="pt-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {filteredResources.filter(r => r.type === "Community").length > 0 ? (
+                      filteredResources
+                        .filter(r => r.type === "Community")
+                        .map((resource, idx) => (
+                          <ResourceCard key={idx} resource={resource} />
+                        ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">No community resources found matching your criteria</p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
         
-        <TabsContent value="guides" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Migration Guide</CardTitle>
-                <CardDescription>
-                  End-to-end migration process documentation
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Migration Planning Checklist</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Assessment Framework Document</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Phased Migration Approach</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">User Adoption Strategy</a>
-                  </li>
-                </ul>
-                
-                <Button className="w-full" variant="outline">
-                  Download Complete Guide (PDF)
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Expression Translation</CardTitle>
-                <CardDescription>
-                  Convert Qlik expressions to Power BI DAX
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Code className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Basic Aggregations</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Code className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Set Analysis to CALCULATE</a>
-                    <Badge variant="outline" className="text-xs">Popular</Badge>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Code className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Time Functions</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Code className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Advanced Calculations</a>
-                  </li>
-                </ul>
-                
-                <Button className="w-full" variant="outline">
-                  View Expression Library
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Best Practices</CardTitle>
-                <CardDescription>
-                  Recommended approaches for optimal results
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Data Modeling Patterns</a>
-                    <Badge variant="outline" className="text-xs">Popular</Badge>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Performance Optimization</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Visualization Best Practices</a>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-sm hover:underline">Governance & Security</a>
-                  </li>
-                </ul>
-                
-                <Button className="w-full" variant="outline">
-                  Browse All Guides
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-          
+        <div className="md:w-1/4">
           <Card>
             <CardHeader>
-              <CardTitle>Featured Guide: Set Analysis to DAX Conversion</CardTitle>
+              <CardTitle>Resource Types</CardTitle>
               <CardDescription>
-                Learn how to convert Qlik's powerful Set Analysis expressions to DAX
+                Browse by content format
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center gap-3 p-2 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <div className="bg-primary/10 p-2 rounded-md">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <h3 className="font-medium mb-2">Qlik Set Analysis</h3>
-                  <div className="bg-muted p-3 rounded-md font-mono text-sm overflow-x-auto">
-                    <p>Sum({&lt;Year={2023}, Region={'North America'}&gt;} Sales)</p>
-                  </div>
-                  <p className="text-sm mt-3 text-muted-foreground">
-                    Set Analysis in Qlik lets you create sets of data with custom selections,
-                    overriding current selections.
-                  </p>
+                  <p className="font-medium">Documentation</p>
+                  <p className="text-xs text-muted-foreground">Official guides & reference</p>
                 </div>
-                
+              </div>
+              
+              <div className="flex items-center gap-3 p-2 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <div className="bg-primary/10 p-2 rounded-md">
+                  <Video className="h-5 w-5 text-primary" />
+                </div>
                 <div>
-                  <h3 className="font-medium mb-2">Power BI DAX Equivalent</h3>
-                  <div className="bg-muted p-3 rounded-md font-mono text-sm overflow-x-auto">
-                    <p>CALCULATE(SUM(Sales[Amount]),<br />Dates[Year] = 2023,<br />Region[Name] = "North America")</p>
-                  </div>
-                  <p className="text-sm mt-3 text-muted-foreground">
-                    CALCULATE in DAX filters the context in which an expression is evaluated,
-                    similar to Qlik's Set Analysis.
-                  </p>
+                  <p className="font-medium">Video Tutorials</p>
+                  <p className="text-xs text-muted-foreground">Step-by-step walkthroughs</p>
                 </div>
               </div>
               
-              <div className="bg-muted/30 p-4 rounded-md mt-4">
-                <h3 className="font-medium mb-2">Key Differences</h3>
-                <ul className="space-y-1 text-sm">
-                  <li>• DAX requires explicit relationship paths between tables</li>
-                  <li>• Qlik's dollar-sign expansion has no direct equivalent in DAX</li>
-                  <li>• Set modifiers (+=*-) must be recreated using DAX functions like UNION, INTERSECT</li>
-                  <li>• Advanced set operations require more complex CALCULATE expressions</li>
-                </ul>
+              <div className="flex items-center gap-3 p-2 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <div className="bg-primary/10 p-2 rounded-md">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">Training Courses</p>
+                  <p className="text-xs text-muted-foreground">In-depth learning materials</p>
+                </div>
               </div>
               
-              <div className="flex justify-center mt-4">
-                <Button>
-                  Read Full Guide
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
+              <div className="flex items-center gap-3 p-2 border rounded-md hover:bg-muted/50 cursor-pointer">
+                <div className="bg-primary/10 p-2 rounded-md">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">Sample Files</p>
+                  <p className="text-xs text-muted-foreground">Templates & examples</p>
+                </div>
               </div>
             </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">
+                Submit a Resource
+              </Button>
+            </CardFooter>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="videos" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-3">
-                  <PlayCircle className="h-12 w-12 text-muted-foreground opacity-70" />
-                </div>
-                <CardTitle className="text-lg">Migration Methodology</CardTitle>
-                <CardDescription>
-                  Step-by-step approach to migrating from Qlik to Power BI
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                  <span>23:45</span>
-                  <span>Beginner</span>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Watch Video
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-3">
-                  <PlayCircle className="h-12 w-12 text-muted-foreground opacity-70" />
-                </div>
-                <CardTitle className="text-lg">Data Modeling Techniques</CardTitle>
-                <CardDescription>
-                  Converting Qlik associative models to Power BI star schema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                  <span>31:12</span>
-                  <span>Intermediate</span>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Watch Video
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-3">
-                  <PlayCircle className="h-12 w-12 text-muted-foreground opacity-70" />
-                </div>
-                <CardTitle className="text-lg">Advanced DAX for Qlik Users</CardTitle>
-                <CardDescription>
-                  Mastering DA equivalent functionality in Power BI
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                  <span>42:18</span>
-                  <span>Advanced</span>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Watch Video
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
           
-          <Card>
+          <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Video Tutorial Series</CardTitle>
+              <CardTitle>Getting Started</CardTitle>
               <CardDescription>
-                Complete learning path for Qlik to Power BI migration
+                Essential first steps
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Beginner Series: Migration Foundations</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">1. Understanding the Migration Process</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">15:22</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">2. Analyzing Your Qlik Environment</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">18:45</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">3. Power BI Fundamentals for Qlik Users</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">22:10</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Intermediate Series: Technical Implementation</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">1. Data Modeling Best Practices</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">31:12</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">2. Recreating Qlik Visualizations</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">27:35</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">3. Set Analysis to DAX Translation</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">34:18</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Advanced Series: Optimization & Advanced Features</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">1. Advanced DAX Techniques</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">42:18</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">2. Performance Optimization</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">38:25</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">3. Complex Migration Case Studies</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">45:40</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="community" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Forums</CardTitle>
-                <CardDescription>
-                  Connect with other professionals migrating from Qlik to Power BI
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Migration Assistant Community</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Our dedicated forum for users of this migration tool
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Join Community
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Power BI Community</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Microsoft's official community for Power BI users
-                  </p>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href="https://community.powerbi.com" target="_blank" rel="noopener noreferrer">
-                      Visit Forum
-                    </a>
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Qlik Community</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Qlik's official community for Qlik users
-                  </p>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href="https://community.qlik.com" target="_blank" rel="noopener noreferrer">
-                      Visit Forum
-                    </a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Expert Support</CardTitle>
-                <CardDescription>
-                  Get professional assistance with your migration
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Ask an Expert</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Submit questions to our migration specialists
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Submit Question
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Migration Consulting</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Professional consulting services for complex migrations
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Learn About Services
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-medium">Office Hours</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Weekly live Q&A sessions with migration experts
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      View Schedule
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Register
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Featured Community Discussions</CardTitle>
-              <CardDescription>
-                Popular topics from our migration community
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium">Handling Complex Set Analysis in Power BI</h3>
-                    <Badge>Popular</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground my-2">
-                    Discussion on translating complex set analysis expressions to DAX...
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">23 replies · Updated 2 days ago</div>
-                    <Button variant="outline" size="sm">
-                      View Thread
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium">Best Practices for Data Volume Migration</h3>
-                    <Badge variant="secondary">Technical</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground my-2">
-                    Strategies for handling large datasets when migrating from Qlik to Power BI...
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">17 replies · Updated 5 days ago</div>
-                    <Button variant="outline" size="sm">
-                      View Thread
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-medium">User Adoption Strategies</h3>
-                    <Badge variant="outline">Case Study</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground my-2">
-                    How we helped our organization's users transition from Qlik to Power BI...
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">12 replies · Updated 1 week ago</div>
-                    <Button variant="outline" size="sm">
-                      View Thread
-                    </Button>
-                  </div>
-                </div>
+            <CardContent className="space-y-4">
+              <div className="border-l-4 border-primary pl-4 py-2">
+                <h4 className="font-medium">Migration Roadmap</h4>
+                <p className="text-sm text-muted-foreground">
+                  Follow our structured approach to migration
+                </p>
+                <Button variant="link" className="p-0" size="sm">
+                  View Roadmap
+                </Button>
               </div>
               
-              <div className="mt-6 text-center">
-                <Button>
-                  Explore All Discussions
-                  <ExternalLink className="ml-2 h-4 w-4" />
+              <div className="border-l-4 border-secondary pl-4 py-2">
+                <h4 className="font-medium">Download Power BI Desktop</h4>
+                <p className="text-sm text-muted-foreground">
+                  Free to download and start developing
+                </p>
+                <Button variant="link" className="p-0" size="sm">
+                  Download Now
+                </Button>
+              </div>
+              
+              <div className="border-l-4 border-accent pl-4 py-2">
+                <h4 className="font-medium">Migration Checklist</h4>
+                <p className="text-sm text-muted-foreground">
+                  Key items to address during your migration
+                </p>
+                <Button variant="link" className="p-0" size="sm">
+                  View Checklist
                 </Button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="downloads" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Templates & Tools</CardTitle>
-                <CardDescription>
-                  Resources to accelerate your migration
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Migration Assessment Template</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Excel template for cataloging Qlik applications and planning migration
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download Excel Template
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Power BI Theme for Qlik Users</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    JSON theme file with colors and styles familiar to Qlik users
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download Theme File
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">DAX Pattern Library</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Common DAX patterns that mimic Qlik functionality
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download DAX Library
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Documentation</CardTitle>
-                <CardDescription>
-                  Detailed guides and reference materials
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Complete Migration Guide</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Comprehensive PDF guide covering all aspects of migration
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download PDF (12MB)
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Expression Reference Sheet</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Quick reference for Qlik to DAX translations
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download PDF (5MB)
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Migration Checklist</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Step-by-step checklist to ensure thorough migration
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download PDF (3MB)
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Sample Files</CardTitle>
-                <CardDescription>
-                  Example files demonstrating migration scenarios
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Sales Dashboard Migration</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Before (Qlik) and after (Power BI) files for sales dashboard
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download Sample Files
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Financial Reporting Migration</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Financial reports migrated from QlikView to Power BI
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download Sample Files
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Data Model Examples</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Before and after data models showing transformation
-                  </p>
-                  <Button variant="outline" size="sm">
-                    Download Sample Files
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Microsoft Power BI Resources</CardTitle>
-              <CardDescription>
-                Official Microsoft documentation and learning resources
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center mb-4">
-                      <BookOpen className="h-10 w-10 mx-auto text-powerbi" />
-                      <h3 className="font-medium mt-2">Official Documentation</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4 text-center">
-                      Microsoft's comprehensive Power BI documentation
-                    </p>
-                    <div className="flex justify-center">
-                      <Button variant="outline" size="sm" asChild>
-                        <a href="https://learn.microsoft.com/en-us/power-bi/" target="_blank" rel="noopener noreferrer">
-                          Visit Documentation
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center mb-4">
-                      <GraduationCap className="h-10 w-10 mx-auto text-powerbi" />
-                      <h3 className="font-medium mt-2">Microsoft Learn</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4 text-center">
-                      Free learning paths and modules for Power BI
-                    </p>
-                    <div className="flex justify-center">
-                      <Button variant="outline" size="sm" asChild>
-                        <a href="https://learn.microsoft.com/en-us/training/powerplatform/power-bi" target="_blank" rel="noopener noreferrer">
-                          Start Learning
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center mb-4">
-                      <PlayCircle className="h-10 w-10 mx-auto text-powerbi" />
-                      <h3 className="font-medium mt-2">Guy in a Cube</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4 text-center">
-                      Microsoft's official Power BI YouTube channel
-                    </p>
-                    <div className="flex justify-center">
-                      <Button variant="outline" size="sm" asChild>
-                        <a href="https://www.youtube.com/c/GuyInACube" target="_blank" rel="noopener noreferrer">
-                          Watch Videos
-                        </a>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="mt-6 text-center">
-                <Button asChild>
-                  <a href="https://powerbi.microsoft.com/en-us/" target="_blank" rel="noopener noreferrer">
-                    Microsoft Power BI Website
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
+  );
+};
+
+interface ResourceCardProps {
+  resource: {
+    title: string;
+    description: string;
+    category: string;
+    type: string;
+    url: string;
+    tags: string[];
+  };
+}
+
+const ResourceCard = ({ resource }: ResourceCardProps) => {
+  const getCategoryIcon = () => {
+    switch (resource.category) {
+      case 'Documentation':
+        return <BookOpen className="h-5 w-5" />;
+      case 'Video':
+        return <Video className="h-5 w-5" />;
+      case 'Training':
+        return <GraduationCap className="h-5 w-5" />;
+      default:
+        return <FileText className="h-5 w-5" />;
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between">
+          <Badge variant="outline">{resource.category}</Badge>
+          <Badge variant={resource.type === "Official" ? "default" : "secondary"}>
+            {resource.type}
+          </Badge>
+        </div>
+        <CardTitle className="text-lg mt-2">
+          {resource.title}
+        </CardTitle>
+        <CardDescription>
+          {resource.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {resource.tags.map((tag, idx) => (
+            <Badge key={idx} variant="outline" className="bg-muted/50">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          {getCategoryIcon()}
+          <span>{resource.category}</span>
+        </div>
+        <Button asChild size="sm">
+          <a href={resource.url} target="_blank" rel="noopener noreferrer">
+            View Resource
+            <ArrowUpRight className="ml-1 h-4 w-4" />
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

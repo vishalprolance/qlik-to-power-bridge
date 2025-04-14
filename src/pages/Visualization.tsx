@@ -568,7 +568,7 @@ const Visualization = () => {
                           Configure how selecting data in one visual affects other visuals.
                         </p>
                         <div className="text-sm">
-                          <span className="font-medium">How to:</span> Format visual > Edit interactions > Set to Filter, Highlight, or None
+                          <span className="font-medium">How to:</span> Format visual &gt; Edit interactions &gt; Set to Filter, Highlight, or None
                         </div>
                       </div>
                       
@@ -578,7 +578,7 @@ const Visualization = () => {
                           Create saved states similar to Qlik's alternate states.
                         </p>
                         <div className="text-sm">
-                          <span className="font-medium">How to:</span> View > Bookmarks pane > Add bookmark > Configure bookmark
+                          <span className="font-medium">How to:</span> View &gt; Bookmarks pane &gt; Add bookmark &gt; Configure bookmark
                         </div>
                       </div>
                       
@@ -588,7 +588,7 @@ const Visualization = () => {
                           Create detailed views accessible via right-click.
                         </p>
                         <div className="text-sm">
-                          <span className="font-medium">How to:</span> Create destination page > Format page > Drill-through > Add fields
+                          <span className="font-medium">How to:</span> Create destination page &gt; Format page &gt; Drill-through &gt; Add fields
                         </div>
                       </div>
                     </div>
