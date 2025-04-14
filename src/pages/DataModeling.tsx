@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -600,7 +599,11 @@ const DataModeling = () => {
               
               <div className="mt-6 text-center">
                 <Button asChild>
-                  <a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-modeling-view" target="_blank" rel="noopener noreferrer">
+                  <a 
+                    href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-modeling-view" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
                     Microsoft Power BI Documentation
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </a>
